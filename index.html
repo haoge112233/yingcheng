@@ -1,26 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📱 手机服务器控制台</title>
     <style>
-        body { font-family: Arial; padding: 20px; }
-        .status { background: #4CAF50; color: white; padding: 20px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { 
+            text-align: center; 
+            padding: 40px 20px; 
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+        h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        .domain-box { 
+            background: rgba(0,0,0,0.3); 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin: 20px 0;
+            font-family: monospace;
+            border: 2px solid #4CAF50;
+        }
+        .btn { 
+            background: #4CAF50; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            margin: 10px;
+        }
+        .instructions { 
+            background: rgba(255,255,255,0.1); 
+            padding: 20px; 
+            border-radius: 15px; 
+            margin: 25px 0;
+        }
     </style>
 </head>
 <body>
-    <div class="status">
-        <h1>✅ 手机服务器控制台</h1>
-        <p>固定域名: https://haoge112233.github.io/yingsheng/</p>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 手机服务器部署成功！</h1>
+            <p>你的永久固定域名：</p>
+            <div class="domain-box" id="domain">
+                https://haoge112233.github.io/yingsheng/
+            </div>
+            <p>将此域名加入书签，永久有效！</p>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 使用说明</h3>
+            <p><strong>情况1：手机和电脑在同一WiFi</strong></p>
+            <ol>
+                <li>在Termux启动服务器：<code>python server.py</code></li>
+                <li>获取手机IP：<code>ifconfig | grep inet</code></li>
+                <li>电脑访问：<code>http://[手机IP]:8088</code></li>
+            </ol>
+            
+            <p><strong>情况2：需要公网访问</strong></p>
+            <ol>
+                <li>安装ngrok：<code>pkg install wget && wget [ngrok下载链接]</code></li>
+                <li>启动ngrok：<code>./ngrok http 8088</code></li>
+                <li>使用ngrok提供的地址</li>
+            </ol>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn" onclick="copyDomain()">📋 复制固定域名</button>
+            <button class="btn" onclick="showIPHelp()">🛠️ 获取手机IP帮助</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>💡 重要提示</h3>
+            <p>1. 这个GitHub Pages域名<strong>永久免费</strong>，不会变化</p>
+            <p>2. 不需要Cloudflare隧道（除非需要高级功能）</p>
+            <p>3. 手机服务器只在局域网内运行</p>
+            <p>4. 如需公网访问，使用ngrok等隧道工具</p>
+        </div>
     </div>
-    
-    <h3>服务器功能：</h3>
-    <button onclick="alert('功能1')">文件管理</button>
-    <button onclick="alert('功能2')">终端</button>
-    <button onclick="alert('功能3')">API测试</button>
-    
-    <h3>如何连接到手机：</h3>
-    <p>1. 确保手机和电脑在同一WiFi</p>
-    <p>2. 在Termux获取手机IP: <code>ifconfig | grep inet</code></p>
-    <p>3. 在电脑访问: <code>http://手机IP:8088</code></p>
+
+    <script>
+        // 复制域名
+        function copyDomain() {
+            const domain = document.getElementById('domain').textContent;
+            navigator.clipboard.writeText(domain);
+            alert('✅ 域名已复制：' + domain);
+        }
+        
+        // 显示IP帮助
+        function showIPHelp() {
+            alert('获取手机IP方法：\n\n' +
+                  '1. 在Termux中执行：\n' +
+                  '   ifconfig | grep inet\n\n' +
+                  '2. 你会看到类似：\n' +
+                  '   inet 192.168.1.100\n\n' +
+                  '3. 在电脑浏览器访问：\n' +
+                  '   http://192.168.1.100:8088');
+        }
+        
+        // 页面加载完成
+        console.log('手机服务器控制台已加载');
+        console.log('固定域名：https://haoge112233.github.io/yingsheng/');
+    </script>
 </body>
-        </html>
+</html>
