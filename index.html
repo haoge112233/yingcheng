@@ -1,117 +1,40 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📱 手机服务器控制台</title>
+    <title>🔒 私人网盘入口</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container { max-width: 800px; margin: 0 auto; }
-        .header { 
-            text-align: center; 
-            padding: 40px 20px; 
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            margin-bottom: 30px;
-        }
-        h1 { font-size: 2.5rem; margin-bottom: 10px; }
-        .domain-box { 
-            background: rgba(0,0,0,0.3); 
-            padding: 15px; 
-            border-radius: 10px; 
-            margin: 20px 0;
-            font-family: monospace;
-            border: 2px solid #4CAF50;
-        }
-        .btn { 
-            background: #4CAF50; 
-            color: white; 
-            border: none; 
-            padding: 12px 24px; 
-            border-radius: 8px; 
-            font-size: 16px; 
-            cursor: pointer; 
-            margin: 10px;
-        }
-        .instructions { 
-            background: rgba(255,255,255,0.1); 
-            padding: 20px; 
-            border-radius: 15px; 
-            margin: 25px 0;
-        }
+        body { font-family: Arial; padding: 20px; }
+        .secure-note { background: #ffebee; padding: 20px; border-radius: 10px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🎉 手机服务器部署成功！</h1>
-            <p>你的永久固定域名：</p>
-            <div class="domain-box" id="domain">
-                https://haoge112233.github.io/yingsheng/
-            </div>
-            <p>将此域名加入书签，永久有效！</p>
-        </div>
-        
-        <div class="instructions">
-            <h3>📋 使用说明</h3>
-            <p><strong>情况1：手机和电脑在同一WiFi</strong></p>
-            <ol>
-                <li>在Termux启动服务器：<code>python server.py</code></li>
-                <li>获取手机IP：<code>ifconfig | grep inet</code></li>
-                <li>电脑访问：<code>http://[手机IP]:8088</code></li>
-            </ol>
-            
-            <p><strong>情况2：需要公网访问</strong></p>
-            <ol>
-                <li>安装ngrok：<code>pkg install wget && wget [ngrok下载链接]</code></li>
-                <li>启动ngrok：<code>./ngrok http 8088</code></li>
-                <li>使用ngrok提供的地址</li>
-            </ol>
-        </div>
-        
-        <div style="text-align: center; margin-top: 30px;">
-            <button class="btn" onclick="copyDomain()">📋 复制固定域名</button>
-            <button class="btn" onclick="showIPHelp()">🛠️ 获取手机IP帮助</button>
-        </div>
-        
-        <div class="instructions">
-            <h3>💡 重要提示</h3>
-            <p>1. 这个GitHub Pages域名<strong>永久免费</strong>，不会变化</p>
-            <p>2. 不需要Cloudflare隧道（除非需要高级功能）</p>
-            <p>3. 手机服务器只在局域网内运行</p>
-            <p>4. 如需公网访问，使用ngrok等隧道工具</p>
-        </div>
+    <h1>🔐 私人网盘</h1>
+    
+    <div class="secure-note">
+        <h3>⚠️ 安全提示</h3>
+        <p>文件存储在手机本地，不上传到GitHub！</p>
+        <p>通过密码保护访问，确保隐私安全</p>
     </div>
+    
+    <h3>连接手机网盘：</h3>
+    <p>1. 确保手机服务器正在运行</p>
+    <p>2. 在Termux获取手机IP：<code>ifconfig | grep inet</code></p>
+    <p>3. 访问：<code>http://[手机IP]:8088</code></p>
+    <p>4. 输入用户名密码登录</p>
+    
+    <div style="margin-top: 30px;">
+        <h3>📱 手机端管理</h3>
+        <p>在Termux中管理文件：</p>
+        <pre>
+# 查看文件
+ls ~/phone-server/private_files/
 
-    <script>
-        // 复制域名
-        function copyDomain() {
-            const domain = document.getElementById('domain').textContent;
-            navigator.clipboard.writeText(domain);
-            alert('✅ 域名已复制：' + domain);
-        }
-        
-        // 显示IP帮助
-        function showIPHelp() {
-            alert('获取手机IP方法：\n\n' +
-                  '1. 在Termux中执行：\n' +
-                  '   ifconfig | grep inet\n\n' +
-                  '2. 你会看到类似：\n' +
-                  '   inet 192.168.1.100\n\n' +
-                  '3. 在电脑浏览器访问：\n' +
-                  '   http://192.168.1.100:8088');
-        }
-        
-        // 页面加载完成
-        console.log('手机服务器控制台已加载');
-        console.log('固定域名：https://haoge112233.github.io/yingsheng/');
-    </script>
+# 上传文件到手机
+cp /sdcard/DCIM/Camera/照片.jpg ~/phone-server/private_files/
+
+# 从手机下载文件
+cp ~/phone-server/private_files/文件.jpg /sdcard/Download/
+        </pre>
+    </div>
 </body>
 </html>
