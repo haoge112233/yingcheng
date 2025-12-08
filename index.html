@@ -1,68 +1,527 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>手机网盘测试</title>
-    <style>
-        body { font-family: Arial; padding: 40px; }
-        .box { border: 2px solid #4CAF50; padding: 30px; max-width: 500px; margin: 0 auto; }
-        input { width: 100%; padding: 10px; margin: 10px 0; }
-        button { background: #4CAF50; color: white; padding: 12px 24px; border: none; cursor: pointer; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>樱橙网盘</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#333}
+.login-page,.main-page{display:none;min-height:100vh}
+.login-page.active,.main-page.active{display:block}
+.login-container{max-width:400px;margin:100px auto;padding:40px;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.1)}
+.login-title{font-size:24px;color:#1a73e8;margin-bottom:10px;text-align:center}
+.login-subtitle{color:#666;margin-bottom:30px;text-align:center}
+.form-group{margin-bottom:20px}
+.form-label{display:block;margin-bottom:8px;font-weight:500;color:#444}
+.form-input{width:100%;padding:12px 16px;border:1px solid #ddd;border-radius:8px;font-size:15px;transition:border .3s}
+.form-input:focus{outline:none;border-color:#1a73e8}
+.btn{display:inline-block;padding:12px 24px;background:#1a73e8;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;transition:background .3s}
+.btn:hover{background:#0d62d9}
+.btn-block{width:100%}
+.btn-sm{padding:8px 16px;font-size:14px}
+.btn-danger{background:#ea4335}
+.btn-danger:hover{background:#d33426}
+.btn-success{background:#34a853}
+.btn-success:hover{background:#2d9449}
+.header{background:#fff;padding:20px 30px;border-bottom:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center}
+.header-title{font-size:20px;color:#1a73e8}
+.header-user{display:flex;align-items:center;gap:15px}
+.file-manager{background:#fff;margin:20px;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
+.file-toolbar{padding:20px;border-bottom:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center}
+.search-box{flex:1;max-width:400px;position:relative}
+.search-input{width:100%;padding:10px 40px 10px 16px;border:1px solid #ddd;border-radius:6px}
+.search-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#999}
+.file-table{width:100%;border-collapse:collapse}
+.file-table th{padding:16px 20px;text-align:left;background:#f8f9fa;font-weight:500;color:#444;border-bottom:1px solid #e0e0e0}
+.file-table td{padding:14px 20px;border-bottom:1px solid #f0f0f0}
+.file-table tr:hover{background:#f8f9ff}
+.file-icon{margin-right:10px;font-size:18px}
+.file-actions{display:flex;gap:8px}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center}
+.modal.active{display:flex}
+.modal-content{background:#fff;border-radius:12px;padding:30px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto}
+.modal-title{margin-bottom:20px;font-size:18px;color:#333}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin:20px}
+.stat-card{background:#fff;padding:20px;border-radius:12px}
+.stat-value{font-size:28px;font-weight:600;color:#1a73e8}
+.stat-label{font-size:14px;color:#666;margin-top:5px}
+.progress-bar{height:6px;background:#e0e0e0;border-radius:3px;margin-top:10px;overflow:hidden}
+.progress-fill{height:100%;background:#1a73e8;transition:width .3s}
+.toast{position:fixed;top:20px;right:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;z-index:2000;opacity:0;transform:translateX(100px);transition:all .3s}
+.toast.show{opacity:1;transform:translateX(0)}
+.toast.success{background:#34a853}
+.toast.error{background:#ea4335}
+</style>
 </head>
 <body>
-    <div class="box">
-        <h2>📱 手机私密网盘测试</h2>
-        
-        <input type="text" id="server" placeholder="服务器地址" 
-               value="http://192.168.10.8:8888">
-        <br>
-        <input type="password" id="password" placeholder="密码" value="admin123">
-        <br>
-        <button onclick="login()">🔑 登录测试</button>
-        
-        <div id="result" style="margin-top: 20px;"></div>
-    </div>
-
-    <script>
-        async function login() {
-            const server = document.getElementById('server').value;
-            const password = document.getElementById('password').value;
-            const result = document.getElementById('result');
-            
-            result.innerHTML = '🔄 连接中...';
-            result.style.color = '#666';
-            
-            try {
-                const response = await fetch(server + '/api/login', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({password: password})
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    result.innerHTML = `
-                        ✅ <b>连接成功！</b><br>
-                        👤 用户: ${data.user.username}<br>
-                        🔑 令牌: ${data.token.substring(0, 30)}...<br>
-                        📁 存储: ${data.server_info.storage_path}
-                    `;
-                    result.style.color = 'green';
-                } else {
-                    const error = await response.text();
-                    result.innerHTML = `❌ 登录失败: ${error}`;
-                    result.style.color = 'red';
-                }
-            } catch (e) {
-                result.innerHTML = `❌ 连接失败: ${e.message}`;
-                result.style.color = 'red';
-            }
-        }
-        
-        // 自动测试
-        window.onload = function() {
-            setTimeout(login, 1000);
-        };
-    </script>
+<div class="login-page active" id="loginPage">
+<div class="login-container">
+<h2 class="login-title">樱橙网盘</h2>
+<p class="login-subtitle">连接你的私人存储</p>
+<div class="form-group">
+<label class="form-label">服务器地址</label>
+<input type="text" id="serverAddress" class="form-input" value="http://192.168.10.8:8088">
+</div>
+<div class="form-group">
+<label class="form-label">用户名</label>
+<input type="text" id="username" class="form-input" value="admin">
+</div>
+<div class="form-group">
+<label class="form-label">密码</label>
+<input type="password" id="password" class="form-input" value="admin123">
+</div>
+<button class="btn btn-block" onclick="登录()">登录</button>
+<div class="form-group" style="margin-top:20px;text-align:center">
+<button class="btn btn-sm" onclick="显示注册()">注册账号</button>
+</div>
+</div>
+</div>
+<div class="main-page" id="mainPage">
+<div class="header">
+<div class="header-title">樱橙网盘</div>
+<div class="header-user">
+<span id="userName">admin</span>
+<button class="btn btn-sm" onclick="显示修改密码()">修改密码</button>
+<button class="btn btn-sm btn-danger" onclick="退出登录()">退出</button>
+</div>
+</div>
+<div class="stats-grid">
+<div class="stat-card">
+<div class="stat-value" id="totalFiles">0</div>
+<div class="stat-label">文件总数</div>
+</div>
+<div class="stat-card">
+<div class="stat-value" id="totalSize">0 B</div>
+<div class="stat-label">存储用量</div>
+<div class="progress-bar"><div class="progress-fill" id="storageProgress" style="width:0%"></div></div>
+</div>
+<div class="stat-card">
+<div class="stat-value" id="serverStatus">在线</div>
+<div class="stat-label">服务器状态</div>
+</div>
+</div>
+<div class="file-manager">
+<div class="file-toolbar">
+<div class="search-box">
+<input type="text" class="search-input" id="searchInput" placeholder="搜索文件...">
+<span class="search-icon">🔍</span>
+</div>
+<div>
+<button class="btn btn-sm" onclick="刷新文件()">刷新</button>
+<button class="btn btn-sm btn-success" onclick="显示上传()">上传</button>
+<button class="btn btn-sm btn-danger" onclick="删除选中()" id="deleteBtn" disabled>删除选中</button>
+</div>
+</div>
+<table class="file-table">
+<thead>
+<tr>
+<th style="width:40px"><input type="checkbox" id="selectAll" onchange="全选切换()"></th>
+<th>文件名</th>
+<th>大小</th>
+<th>上传时间</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody id="fileTableBody"></tbody>
+</table>
+</div>
+</div>
+<div class="modal" id="uploadModal">
+<div class="modal-content">
+<h3 class="modal-title">上传文件</h3>
+<input type="file" id="fileInput" multiple style="margin:20px 0;width:100%">
+<div class="progress-bar" style="margin:20px 0;display:none" id="uploadProgressBar">
+<div class="progress-fill" id="uploadProgressFill" style="width:0%"></div>
+</div>
+<div style="display:flex;gap:15px">
+<button class="btn btn-success" onclick="开始上传()">上传</button>
+<button class="btn" onclick="隐藏上传()">取消</button>
+</div>
+</div>
+</div>
+<div class="modal" id="registerModal">
+<div class="modal-content">
+<h3 class="modal-title">注册账号</h3>
+<div class="form-group">
+<label class="form-label">用户名</label>
+<input type="text" id="regUsername" class="form-input">
+</div>
+<div class="form-group">
+<label class="form-label">密码</label>
+<input type="password" id="regPassword" class="form-input">
+</div>
+<div class="form-group">
+<label class="form-label">确认密码</label>
+<input type="password" id="regConfirmPassword" class="form-input">
+</div>
+<div style="display:flex;gap:15px">
+<button class="btn btn-success" onclick="注册()">注册</button>
+<button class="btn" onclick="隐藏注册()">取消</button>
+</div>
+</div>
+</div>
+<div class="modal" id="changePasswordModal">
+<div class="modal-content">
+<h3 class="modal-title">修改密码</h3>
+<div class="form-group">
+<label class="form-label">当前密码</label>
+<input type="password" id="currentPassword" class="form-input">
+</div>
+<div class="form-group">
+<label class="form-label">新密码</label>
+<input type="password" id="newPassword" class="form-input">
+</div>
+<div class="form-group">
+<label class="form-label">确认新密码</label>
+<input type="password" id="confirmNewPassword" class="form-input">
+</div>
+<div style="display:flex;gap:15px">
+<button class="btn btn-success" onclick="修改密码()">确认</button>
+<button class="btn" onclick="隐藏修改密码()">取消</button>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+let 令牌=''
+let 服务器地址=''
+let 用户数据=null
+let 文件列表=[]
+let 选中文件=new Set()
+let 自动刷新间隔=null
+function 显示消息(消息,类型='info'){
+const 提示=document.getElementById('toast')
+提示.textContent=消息
+提示.className='toast '+类型
+提示.classList.add('show')
+setTimeout(()=>提示.classList.remove('show'),3000)
+}
+async function 登录(){
+服务器地址=document.getElementById('serverAddress').value.trim()
+const 用户名=document.getElementById('username').value.trim()
+const 密码=document.getElementById('password').value
+if(!服务器地址||!用户名||!密码){
+显示消息('请输入完整信息','error')
+return
+}
+try{
+const 响应=await fetch(服务器地址+'/api/登录',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({username:用户名,password:密码})
+})
+const 数据=await 响应.json()
+if(数据.success){
+令牌=数据.token
+用户数据=数据.user
+document.getElementById('userName').textContent=用户数据.username
+document.getElementById('loginPage').classList.remove('active')
+document.getElementById('mainPage').classList.add('active')
+开始自动刷新()
+刷新文件()
+显示消息('登录成功','success')
+}else{
+显示消息(数据.message||'登录失败','error')
+}
+}catch(e){
+显示消息('连接失败:'+e.message,'error')
+}
+}
+async function 注册(){
+const 用户名=document.getElementById('regUsername').value.trim()
+const 密码=document.getElementById('regPassword').value
+const 确认密码=document.getElementById('regConfirmPassword').value
+if(!用户名||!密码||!确认密码){
+显示消息('请输入完整信息','error')
+return
+}
+if(密码!==确认密码){
+显示消息('两次密码不一致','error')
+return
+}
+if(密码.length<6){
+显示消息('密码至少6个字符','error')
+return
+}
+try{
+const 响应=await fetch(服务器地址+'/api/注册',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({username:用户名,password:密码})
+})
+const 数据=await 响应.json()
+if(数据.success){
+显示消息('注册成功','success')
+隐藏注册()
+document.getElementById('username').value=用户名
+}else{
+显示消息(数据.message||'注册失败','error')
+}
+}catch(e){
+显示消息('注册失败:'+e.message,'error')
+}
+}
+async function 刷新文件(){
+if(!令牌)return
+try{
+const 响应=await fetch(服务器地址+'/api/文件列表',{
+headers:{'Authorization':'Bearer '+令牌}
+})
+const 数据=await 响应.json()
+if(数据.success){
+文件列表=数据.files||[]
+渲染文件列表()
+更新统计()
+}
+}catch(e){
+console.error('刷新失败:',e)
+}
+}
+function 渲染文件列表(){
+const 表格体=document.getElementById('fileTableBody')
+const 无文件提示=document.getElementById('noFilesMessage')
+if(文件列表.length===0){
+表格体.innerHTML='<tr><td colspan="5" style="text-align:center;padding:40px;color:#999">暂无文件</td></tr>'
+return
+}
+let html=''
+文件列表.forEach(文件=>{
+const 大小=格式文件大小(文件.size)
+const 时间=new Date(文件.uploaded_at).toLocaleString()
+const 图标=获取文件图标(文件.name)
+const 选中=选中文件.has(文件.id)?'checked':''
+html+=`
+<tr>
+<td><input type="checkbox" value="${文件.id}" onchange="切换选中(${文件.id})" ${选中}></td>
+<td><span class="file-icon">${图标}</span>${文件.name}</td>
+<td>${大小}</td>
+<td>${时间}</td>
+<td>
+<div class="file-actions">
+<button class="btn btn-sm" onclick="下载文件(${文件.id})">下载</button>
+<button class="btn btn-sm btn-danger" onclick="删除文件(${文件.id})">删除</button>
+</div>
+</td>
+</tr>
+`
+})
+表格体.innerHTML=html
+document.getElementById('totalFiles').textContent=文件列表.length
+document.getElementById('deleteBtn').disabled=选中文件.size===0
+}
+async function 下载文件(文件id){
+try{
+const 响应=await fetch(服务器地址+'/api/下载/'+文件id,{
+headers:{'Authorization':'Bearer '+令牌}
+})
+if(响应.ok){
+const 文件名=响应.headers.get('Content-Disposition')?.split('filename=')[1]||'file.bin'
+const blob=await 响应.blob()
+const url=URL.createObjectURL(blob)
+const a=document.createElement('a')
+a.href=url
+a.download=文件名
+document.body.appendChild(a)
+a.click()
+document.body.removeChild(a)
+URL.revokeObjectURL(url)
+显示消息('开始下载','success')
+}else{
+显示消息('下载失败','error')
+}
+}catch(e){
+显示消息('下载失败:'+e.message,'error')
+}
+}
+async function 删除文件(文件id){
+if(!confirm('确定要删除这个文件吗？'))return
+try{
+const 响应=await fetch(服务器地址+'/api/删除/'+文件id,{
+method:'DELETE',
+headers:{'Authorization':'Bearer '+令牌}
+})
+const 数据=await 响应.json()
+if(数据.success){
+显示消息('文件已删除','success')
+刷新文件()
+}else{
+显示消息(数据.message||'删除失败','error')
+}
+}catch(e){
+显示消息('删除失败:'+e.message,'error')
+}
+}
+async function 开始上传(){
+const 文件输入=document.getElementById('fileInput')
+if(!文件输入.files.length){
+显示消息('请选择文件','error')
+return
+}
+const 进度条=document.getElementById('uploadProgressBar')
+const 进度填充=document.getElementById('uploadProgressFill')
+进度条.style.display='block'
+let 已上传=0
+const 总文件数=文件输入.files.length
+for(let i=0;i<总文件数;i++){
+const 文件=文件输入.files[i]
+try{
+const 响应=await fetch(服务器地址+'/api/上传',{
+method:'POST',
+headers:{
+'Authorization':'Bearer '+令牌,
+'X-Filename':文件.name
+},
+body:文件
+})
+const 数据=await 响应.json()
+if(数据.success){
+已上传++
+}
+const 进度=Math.round(((i+1)/总文件数)*100)
+进度填充.style.width=进度+'%'
+}catch(e){
+console.error('上传失败:',e)
+}
+}
+显示消息(`上传完成 ${已上传}/${总文件数}`,'success')
+setTimeout(()=>{
+隐藏上传()
+刷新文件()
+},1000)
+}
+async function 修改密码(){
+const 当前密码=document.getElementById('currentPassword').value
+const 新密码=document.getElementById('newPassword').value
+const 确认新密码=document.getElementById('confirmNewPassword').value
+if(!当前密码||!新密码||!确认新密码){
+显示消息('请输入完整信息','error')
+return
+}
+if(新密码!==确认新密码){
+显示消息('两次新密码不一致','error')
+return
+}
+if(新密码.length<6){
+显示消息('新密码至少6个字符','error')
+return
+}
+try{
+const 响应=await fetch(服务器地址+'/api/修改密码',{
+method:'POST',
+headers:{
+'Authorization':'Bearer '+令牌,
+'Content-Type':'application/json'
+},
+body:JSON.stringify({old_password:当前密码,new_password:新密码})
+})
+const 数据=await 响应.json()
+if(数据.success){
+显示消息('密码修改成功','success')
+setTimeout(()=>退出登录(),2000)
+}else{
+显示消息(数据.message||'修改失败','error')
+}
+}catch(e){
+显示消息('修改失败:'+e.message,'error')
+}
+}
+function 开始自动刷新(){
+if(自动刷新间隔)clearInterval(自动刷新间隔)
+自动刷新间隔=setInterval(()=>刷新文件(),30000)
+}
+function 退出登录(){
+if(自动刷新间隔)clearInterval(自动刷新间隔)
+令牌=''
+用户数据=null
+选中文件.clear()
+document.getElementById('loginPage').classList.add('active')
+document.getElementById('mainPage').classList.remove('active')
+显示消息('已退出','info')
+}
+function 格式文件大小(字节){
+if(字节===0)return'0 B'
+const k=1024
+const 单位=['B','KB','MB','GB']
+const i=Math.floor(Math.log(字节)/Math.log(k))
+return parseFloat((字节/Math.pow(k,i)).toFixed(2))+' '+单位[i]
+}
+function 获取文件图标(文件名){
+const 扩展名=文件名.split('.').pop().toLowerCase()
+const 图片=['jpg','jpeg','png','gif','bmp']
+const 视频=['mp4','avi','mov','mkv']
+const 音频=['mp3','wav','flac']
+const 文档=['pdf','doc','docx','txt']
+if(图片.includes(扩展名))return'🖼️'
+if(视频.includes(扩展名))return'🎥'
+if(音频.includes(扩展名))return'🎵'
+if(文档.includes(扩展名))return'📄'
+return'📎'
+}
+function 更新统计(){
+let 总大小=0
+文件列表.forEach(文件=>总大小+=文件.size)
+document.getElementById('totalSize').textContent=格式文件大小(总大小)
+const 进度=Math.min(总大小/(1024*1024*100)*100,100)
+document.getElementById('storageProgress').style.width=进度+'%'
+}
+function 切换选中(文件id){
+if(选中文件.has(文件id)){
+选中文件.delete(文件id)
+}else{
+选中文件.add(文件id)
+}
+document.getElementById('deleteBtn').disabled=选中文件.size===0
+}
+function 全选切换(){
+const 全选=document.getElementById('selectAll').checked
+选中文件.clear()
+if(全选){
+文件列表.forEach(文件=>选中文件.add(文件.id))
+}
+document.getElementById('deleteBtn').disabled=选中文件.size===0
+渲染文件列表()
+}
+async function 删除选中(){
+if(选中文件.size===0)return
+if(!confirm(`确定要删除选中的 ${选中文件.size} 个文件吗？`))return
+for(const 文件id of 选中文件){
+try{
+await fetch(服务器地址+'/api/删除/'+文件id,{
+method:'DELETE',
+headers:{'Authorization':'Bearer '+令牌}
+})
+}catch(e){}
+}
+选中文件.clear()
+显示消息('已删除选中文件','success')
+刷新文件()
+}
+function 显示上传(){
+document.getElementById('uploadModal').classList.add('active')
+}
+function 隐藏上传(){
+document.getElementById('uploadModal').classList.remove('active')
+document.getElementById('fileInput').value=''
+document.getElementById('uploadProgressBar').style.display='none'
+document.getElementById('uploadProgressFill').style.width='0%'
+}
+function 显示注册(){
+document.getElementById('registerModal').classList.add('active')
+}
+function 隐藏注册(){
+document.getElementById('registerModal').classList.remove('active')
+}
+function 显示修改密码(){
+document.getElementById('changePasswordModal').classList.add('active')
+}
+function 隐藏修改密码(){
+document.getElementById('changePasswordModal').classList.remove('active')
+}
+document.addEventListener('DOMContentLoaded',function(){
+const 保存地址=localStorage.getItem('serverAddress')
+if(保存地址)document.getElementById('serverAddress').value=保存地址
+})
+</script>
 </body>
-</html>
+    </html>
